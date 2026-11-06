@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rework Analytics</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="/queue/1">Rework Analytics</a></h1>
+        <nav>
+            {% for a in agents if agents is defined %}
+                <a href="/queue/{{ a.id }}" class="{% if agent_id is defined and agent_id == a.id %}active{% endif %}">{{ a.name }}</a>
+            {% endfor %}
+            <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">Supervisor</a>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

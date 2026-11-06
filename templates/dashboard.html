@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="margin-bottom: 1rem;">
+    <a href="/queue/1" style="display: inline-block; padding: 6px 12px; background: #ddd; color: #333; text-decoration: none; border-radius: 4px; font-size: 0.9rem; font-weight: bold;">
+        ← Back to Agent Queue
+    </a>
+</div>
+
+<h2>Supervisor Dashboard</h2>
+
+<div style="background: #ffe5e5; border-left: 4px solid #c0392b; padding: 1rem; margin-bottom: 2rem;">
+    <strong>System Alert:</strong> There {% if chronic|length == 1 %}is currently <strong>1</strong> ticket{% else %}are currently <strong>{{ chronic|length }}</strong> tickets{% endif %} stuck in Critical Rework. These have been reopened 2+ times.
+</div>
+
+<h3>Rework rate per agent</h3>
+<table>
+    <tr><th>Agent</th><th>Resolved</th><th>Reworked</th><th>Rework rate</th></tr>
+    {% for r in agent_rework %}
+    <tr>
+        <td>{{ r.agent_name }}</td>
+        <td>{{ r.resolved_count }}</td>
+        <td>{{ r.reworked_count }}</td>
+        <td>{{ "%.0f"|format(100 * r.reworked_count / r.resolved_count) if r.resolved_count else 0 }}%</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Rework rate per category</h3>
+<table>
+    <tr><th>Category</th><th>Total tickets</th><th>Reworked</th><th>Rework rate</th></tr>
+    {% for r in category_rework %}
+    <tr>
+        <td>{{ r.category }}</td>
+        <td>{{ r.total }}</td>
+        <td>{{ r.reworked }}</td>
+        <td>{{ "%.0f"|format(100 * r.reworked / r.total) if r.total else 0 }}%</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div style="width: 100%; max-width: 600px; margin: 2rem 0;">
+    <canvas id="reworkChart"></canvas>
+</div>
+
+<h3>Critical Rework (Tickets reopened 2+ times)</h3>
+<table>
+    <tr><th>Ticket</th><th>Subject</th><th>Category</th><th>Reopens</th><th>Tier</th></tr>
+    {% for c in chronic %}
+    <tr>
+        <td><a href="/ticket/{{ c.id }}">#{{ c.id }}</a></td>
+        <td>{{ c.subject }}</td>
+        <td>{{ c.category }}</td>
+        <td><span class="badge">×{{ c.reopen_count }}</span></td>
+        <td>{{ c.tier }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">No active critical rework. All recent cases are progressing normally.</td></tr>
+    {% endfor %}
+</table>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('reworkChart').getContext('2d');
+
+    const labels = [{% for r in category_rework %}'{{ r.category }}',{% endfor %}];
+    const data = [{% for r in category_rework %}{{ r.reworked }},{% endfor %}];
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Reworked Tickets by Category',
+                data: data,
+                backgroundColor: '#c0392b',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
