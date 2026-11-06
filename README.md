@@ -41,7 +41,8 @@ In a real call center, tickets are ingested through phone systems, email parsers
 
 **Supervisor Dashboard (rework rate visualization)**
 
-![Supervisor Dashboard](screenshots/dashboard.png)
+![Supervisor Dashboard](screenshots/dashboard1.png)
+![Supervisor Dashboard](screenshots/dashboard2.png)
 
 **Ticket Event Timeline (immutable audit log)**
 
